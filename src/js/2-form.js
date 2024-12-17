@@ -1,41 +1,39 @@
-const storageKey = 'feedback-form-state';
+'use strict';
+
+let formData = {
+  email: '',
+  message: '',
+};
+
 const form = document.querySelector('.feedback-form');
-const emailInput = form.elements.email;
-const messageInput = form.elements.message;
 
-savedForm();
+const localStorageKey = 'feedback-form-state';
 
-form.addEventListener('submit', event => {
-  event.preventDefault();
+formData = JSON.parse(localStorage.getItem(localStorageKey)) || {
+  email: '',
+  message: '',
+};
+form.elements.email.value = formData.email;
+form.elements.message.value = formData.message;
 
-  const formValues = {
-    email: emailInput.value.trim(),
-    message: messageInput.value.trim(),
-  };
-
-  if (formValues.email === '' || formValues.message === '') {
-    return alert('Please fill in all the fields!');
-  }
-
-  console.log(formValues);
-
-  event.currentTarget.reset();
-  localStorage.removeItem(storageKey);
+form.addEventListener('input', evt => {
+  const fieldName = evt.target.name;
+  const fieldValue = evt.target.value;
+  formData[fieldName] = fieldValue.trim(); 
+  localStorage.setItem(localStorageKey, JSON.stringify(formData)); 
 });
 
-form.addEventListener('input', () => {
-  const formValues = {
-    email: emailInput.value.trim(),
-    message: messageInput.value.trim(),
-  };
-  localStorage.setItem(storageKey, JSON.stringify(formValues));
-});
-
-function savedForm() {
-  const savedMessage = JSON.parse(localStorage.getItem(storageKey));
-
-  if (savedMessage) {
-    emailInput.value = savedMessage.email || '';
-    messageInput.value = savedMessage.message || '';
+form.addEventListener('submit', evt => {
+  evt.preventDefault(); 
+  if (!formData.email || !formData.message) {
+    alert('Fill please all fields'); 
+    return;
   }
-}
+
+  console.log(formData);
+
+  localStorage.removeItem(localStorageKey);
+  form.reset();
+
+  formData = { email: '', message: '' };
+});
